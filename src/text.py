@@ -1,9 +1,8 @@
 import board
-import busio
 from adafruit_ssd1306 import SSD1306_I2C
 from PIL import Image, ImageDraw, ImageFont
 
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
 
 text = "Hello World"
 

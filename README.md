@@ -29,8 +29,6 @@ source oled-status/bin/activate
 2. Install the required libraries:
 
 ```bash
-pip install board
-pip install busio
 pip install adafruit-blinka
 pip install psutil
 pip install adafruit-circuitpython-ssd1306
@@ -41,9 +39,7 @@ pip install pillow
 
 The following libraries are required for this project:
 
-- `board`
-- `busio`
-- `adafruit-blinka`
+- `adafruit-blinka` (provides `board` and I2C support)
 - `psutil`
 - `adafruit-circuitpython-ssd1306`
 - `pillow`
@@ -51,8 +47,6 @@ The following libraries are required for this project:
 Install them using:
 
 ```bash
-pip install board
-pip install busio
 pip install adafruit-blinka
 pip install psutil
 pip install adafruit-circuitpython-ssd1306
@@ -62,6 +56,17 @@ pip install pillow
 ## Connecting an OLED display
 
 ![Connection Diagram](connection-diagram.png)
+
+## Testing Connection
+
+After wiring the OLED display, test the I2C connection:
+
+```bash
+source ./system-info-pi5/venv/bin/activate
+python ./system-info-pi5/test_connection.py
+```
+
+This will scan the I2C bus, list detected devices, and flash the display to confirm it works.
 
 ## Usage
 

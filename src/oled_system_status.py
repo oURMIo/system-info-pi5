@@ -1,5 +1,4 @@
 import board
-import busio
 import socket
 import psutil
 import subprocess
@@ -7,7 +6,7 @@ import time
 from adafruit_ssd1306 import SSD1306_I2C
 from PIL import Image, ImageDraw, ImageFont
 
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
 disp = SSD1306_I2C(128, 64, i2c)
 
 disp.fill(0)
@@ -51,33 +50,26 @@ def get_system_info():
     cpu_usage = psutil.cpu_percent(interval=1)
     memory_info = psutil.virtual_memory()
     memory_usage = memory_info.percent
+    disk_usage = psutil.disk_usage("/").percent
+
     net_before = psutil.net_io_counters()
     time.sleep(1)
     net_after = psutil.net_io_counters()
     net_sent = (net_after.bytes_sent - net_before.bytes_sent) / 1024
     net_recv = (net_after.bytes_recv - net_before.bytes_recv) / 1024
-    return cpu_usage, memory_usage, net_sent, net_recv
+
+    return cpu_usage, memory_usage, disk_usage, net_sent, net_recv
 
 
-IP_DISK_UPDATE_INTERVAL = 180  # 3 min
-SYSTEM_UPDATE_INTERVAL = 1  # 1 sec
+UPDATE_INTERVAL = 1
 
-last_ip_disk_update_time = time.time()
-last_system_update_time = time.time()
-
-ip_address = get_ip_address()
-disk_usage = psutil.disk_usage("/").percent
+last_update_time = time.time()
 
 while True:
     current_time = time.time()
-
-    if current_time - last_ip_disk_update_time >= IP_DISK_UPDATE_INTERVAL:
+    if current_time - last_update_time >= UPDATE_INTERVAL:
         ip_address = get_ip_address()
-        disk_usage = psutil.disk_usage("/").percent
-        last_ip_disk_update_time = current_time
-
-    if current_time - last_system_update_time >= SYSTEM_UPDATE_INTERVAL:
-        cpu_usage, memory_usage, net_sent, net_recv = get_system_info()
+        cpu_usage, memory_usage, disk_usage, net_sent, net_recv = get_system_info()
         cpu_temp = get_cpu_temp()
 
         draw.rectangle((0, 0, disp.width, disp.height), outline=0, fill=0)
@@ -92,6 +84,6 @@ while True:
         disp.image(image)
         disp.show()
 
-        last_system_update_time = current_time
+        last_update_time = current_time
 
     time.sleep(0.05)  # Small sleep to avoid 100% CPU usage

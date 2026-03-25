@@ -1,5 +1,4 @@
 import socket
-import subprocess
 import time
 
 import board
@@ -54,10 +53,9 @@ def get_ip_address():
 
 def get_cpu_temp():
     try:
-        result = subprocess.run(
-            ["vcgencmd", "measure_temp"], capture_output=True, text=True
-        )
-        return result.stdout.strip().split("=")[1].replace("'C", "")
+        with open("/sys/class/thermal/thermal_zone0/temp") as f:
+            temp = int(f.read().strip()) / 1000
+        return f"{temp:.1f}"
     except Exception:
         return "N/A"
 

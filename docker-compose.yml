@@ -8,5 +8,6 @@ services:
       - /dev/i2c-1:/dev/i2c-1
       - /dev/gpiomem:/dev/gpiomem
       - /sys:/sys:ro
+      - /proc/device-tree:/proc/device-tree:ro
     environment:
       - BLINKA_FT232H=0

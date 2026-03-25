@@ -10,4 +10,5 @@ services:
       - /sys:/sys:ro
       - /proc/device-tree:/proc/device-tree:ro
     environment:
-      - BLINKA_FT232H=0
+      - BLINKA_FORCEBOARD=RASPBERRY_PI_5
+      - BLINKA_FORCECHIP=BCM2XXX

@@ -1,84 +1,95 @@
 # System-Info-PI5
 
-Displaying system information on an OLED display for Raspberry Pi 5
+Display real-time system information on an SSD1306 OLED display connected to a Raspberry Pi 5.
 
-## Description
+Shows: IP address, CPU/RAM/Disk usage, CPU temperature, and network throughput.
 
-This project displays system information such as CPU usage, memory usage, and other vital statistics on an OLED display connected to a Raspberry Pi 5. The project is written in Python and uses several libraries to interact with the hardware and retrieve system information.
+![Connection Diagram](connection-diagram.png)
 
-## Cloning the Repository
+## Scripts
 
-To get started, clone the repository and navigate to the project directory:
+| Script | Description |
+|--------|-------------|
+| `src/oled_system_status.py` | Continuously displays system stats on the OLED |
+| `src/oled_system_status_butten.py` | Same as above, with a button on GPIO17 to toggle the display on/off |
+| `src/turn_off_display.py` | Turns the display off |
+| `src/test_connection.py` | Scans the I2C bus and verifies the display connection |
+
+## Setup
+
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/oURMIo/system-info-pi5.git
 cd system-info-pi5
 ```
 
-## Setup and Installation
-
-Before running the project, you need to set up a virtual environment and install the necessary libraries. Follow these steps:
-
-1. Create and activate a virtual environment:
+2. Create a virtual environment and install dependencies:
 
 ```bash
-python3 -m venv oled-status
-source oled-status/bin/activate
+python3 -m venv venv
+source venv/bin/activate
+pip install adafruit-blinka psutil adafruit-circuitpython-ssd1306 pillow
 ```
-
-2. Install the required libraries:
-
-```bash
-pip install adafruit-blinka
-pip install psutil
-pip install adafruit-circuitpython-ssd1306
-pip install pillow
-```
-
-## Libraries Used
-
-The following libraries are required for this project:
-
-- `adafruit-blinka` (provides `board` and I2C support)
-- `psutil`
-- `adafruit-circuitpython-ssd1306`
-- `pillow`
-
-Install them using:
-
-```bash
-pip install adafruit-blinka
-pip install psutil
-pip install adafruit-circuitpython-ssd1306
-pip install pillow
-```
-
-## Connecting an OLED display
-
-![Connection Diagram](connection-diagram.png)
-
-## Testing Connection
-
-After wiring the OLED display, test the I2C connection:
-
-```bash
-source ./system-info-pi5/venv/bin/activate
-python ./system-info-pi5/test_connection.py
-```
-
-This will scan the I2C bus, list detected devices, and flash the display to confirm it works.
 
 ## Usage
 
-After setting up the environment and installing the necessary libraries, you can run the project script to start displaying system information on the OLED display. Ensure your OLED display is properly connected to the Raspberry Pi 5.
-
-To activate the virtual environment and run the script:
+### Test the connection
 
 ```bash
-source ./system-info-pi5/venv/bin/activate
-python ./system-info-pi5/oled_system_status.py
+source venv/bin/activate
+python src/test_connection.py
+```
+
+### Run the status display
+
+```bash
+./oled-stats.sh
+```
+
+Or manually:
+
+```bash
+source venv/bin/activate
+python src/oled_system_status_butten.py
+```
+
+### Turn off the display
+
+```bash
+source venv/bin/activate
+python src/turn_off_display.py
+```
+
+## Autostart on boot (systemd)
+
+1. Create a service file:
+
+```bash
+sudo tee /etc/systemd/system/oled-stats.service << EOF
+[Unit]
+Description=OLED System Status Display
+After=multi-user.target
+
+[Service]
+ExecStart=/path/to/system-info-pi5/oled-stats.sh
+WorkingDirectory=/path/to/system-info-pi5
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+2. Enable and start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable oled-stats.service
+sudo systemctl start oled-stats.service
 ```
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE.md file for more details
+MIT License. See [LICENSE.md](LICENSE.md) for details.

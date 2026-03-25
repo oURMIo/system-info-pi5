@@ -1,9 +1,6 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-PROJECT_NAME=/system-info-pi5
-PATH_TO_PROJECT=/path
-
-
-source $PATH_TO_PROJECT/$PROJECT_NAME/venv/bin/activate
-python $PATH_TO_PROJECT/$PROJECT_NAME/oled_system_status.py
+source "$SCRIPT_DIR/venv/bin/activate"
+python "$SCRIPT_DIR/src/oled_system_status_butten.py"

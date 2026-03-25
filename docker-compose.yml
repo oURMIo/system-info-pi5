@@ -1,0 +1,11 @@
+services:
+  oled-status:
+    build: .
+    container_name: oled-status
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /dev/i2c-1:/dev/i2c-1
+      - /dev/gpiomem:/dev/gpiomem
+    environment:
+      - BLINKA_FT232H=0

@@ -3,6 +3,7 @@ import subprocess
 import time
 
 import board
+import digitalio
 import psutil
 from adafruit_ssd1306 import SSD1306_I2C
 from PIL import Image, ImageDraw, ImageFont
@@ -12,6 +13,9 @@ HEIGHT = 64
 LINE_HEIGHT = 10
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_SIZE = 10
+
+BUTTON_PIN = board.D17
+DEBOUNCE_TIME = 0.3
 
 SYSTEM_UPDATE_INTERVAL = 1
 SLOW_UPDATE_INTERVAL = 180
@@ -23,6 +27,12 @@ def init_display():
     display.fill(0)
     display.show()
     return display
+
+
+def init_button():
+    button = digitalio.DigitalInOut(BUTTON_PIN)
+    button.direction = digitalio.Direction.INPUT
+    return button
 
 
 def create_canvas(display):
@@ -72,15 +82,50 @@ def render(draw, font, lines):
         draw.text((0, i * LINE_HEIGHT), line, font=font, fill=255)
 
 
+def turn_off(display):
+    display.fill(0)
+    display.show()
+    display.poweroff()
+
+
+def turn_on(display):
+    display.poweron()
+
+
+def button_pressed(button, prev_state):
+    current = button.value
+    pressed = current and not prev_state
+    return pressed, current
+
+
 def main():
     display = init_display()
+    button = init_button()
     image, draw, font = create_canvas(display)
+
+    display_on = True
+    prev_button = button.value
 
     ip = get_ip_address()
     disk = psutil.disk_usage("/").percent
     last_slow_update = time.time()
 
     while True:
+        pressed, prev_button = button_pressed(button, prev_button)
+
+        if pressed:
+            display_on = not display_on
+            if display_on:
+                turn_on(display)
+            else:
+                turn_off(display)
+            time.sleep(DEBOUNCE_TIME)
+            continue
+
+        if not display_on:
+            time.sleep(0.05)
+            continue
+
         now = time.time()
 
         if now - last_slow_update >= SLOW_UPDATE_INTERVAL:
